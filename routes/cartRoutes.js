@@ -67,22 +67,17 @@ const store = [
 ];
 
 let cart =[
-  {
-    id:1,
-    email:'johndoe@gmail.com',
-    cartitems:[
-      {id:1,
-        quantity: 2,
-        price: "12500",
-        category: "accessories",
-        title: 'Leather Backpack',
-        price: '12500',
-        spec: 'old', 
-        category: 'accessories',
-        img: '',
-      }
-    ]
-  }
+    { id:1,
+      cartId: 1,
+      quantity: 2,
+      email:"johndoe@gmail.com",
+      price: 12500,
+      category: "accessories",
+      title: 'Leather Backpack',
+      spec: 'old', 
+      category: 'accessories',
+      img: '',
+    }
 ]
 router.get('/',(req,res) => {
   res.status(201).json('cart is working')
@@ -93,31 +88,56 @@ router.post('/',authMiddleware,(req,res) => {
 
   if (!email) return res.status(401).json({error: 'no user id provided'});  
 
-  const getusercart = cart.find(item => item.email == email);  
+  const getusercart = cart.filter(item => item.email == email);  
 
   res.status(201).json(getusercart)
 })
 
-router.delete('/delete',authMiddleware,(req,res) => {
-  const {email,itemId} = req.body 
+router.post('/:id',authMiddleware,(req,res) => {
+  const {email,quantity} = req.body;
+  const id = req.params.id
 
-  if (!email || !itemId) return res.status(401).json({error: 'no user id provided'});  
+  if (!email) res.status(401).json({error: 'no user info provided'});
 
-  const getusercart = cart.find(item => item.email == email);  
+  const findItem = store.find(item => item.id == id);
 
-  if (!getusercart) return res.status(401).json({error: 'user has no cart'});  
+  if (!findItem) res.status(401).json({error: 'cart item does not exist'});
 
-  let findCartItem = getusercart.cartitems.find(item => item.id == itemId)
+  const findincart = cart.find(item => item.id == id && item.email == email);
 
-  if (!findCartItem) return res.status(401).json({error: 'cart item not in user cart'});
+  const newCart = {
+      id:cart.length + 1,
+      cartId : findItem.id,
+      quantity: quantity,
+      email:email,
+      price: findItem.price,
+      category: findItem.category,
+      title: findItem.title,
+      spec: findItem.spec, 
+      category: findItem.category,
+      img: findItem.img,
+    };
 
-  let filteremoveitem = getusercart.cartitems.filter(item => item.id != itemId)
+  if (findincart ){
+    cart.indexOf(findincart) = newCart;
+  } else {
+  cart.push(newCart);
+  }
 
-  cart = cart.map((item) => item.email == email ? 
-    {id: item.id,
-    email:item.email,
-  cartitems:filteremoveitem}
- : item)
+  res.status(201).json('product added to cart')
+
+})
+
+router.delete('/delete/:id',authMiddleware,(req,res) => {
+  const id = req.params.id
+
+  if (!id) return res.status(401).json({error: 'no user id provided'});  
+
+  const getusercart = cart.find(item => item.id == id);  
+
+  if (!getusercart) return res.status(401).json({error: 'item not found'});  
+
+  cart = cart.filter(item => item.id != id);
 
   return res.status(201).json({message:'item deleted'})
 })

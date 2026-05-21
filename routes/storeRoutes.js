@@ -92,4 +92,17 @@ router.post('/category',authMiddleware,(req,res) => {
     res.status(201).json(getCategory)
 })
 
+router.post('/:id',authMiddleware,(req,res) => {
+    const id = req.params.id;
+
+    const finditem = store.find(item => item.id == id);
+
+    if (!finditem) {
+        return res.status(401).json({error:'item does not exist'})
+    }
+
+    res.status(201).json(finditem)
+});
+
+
 export default router
