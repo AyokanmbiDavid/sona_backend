@@ -1,14 +1,19 @@
 import express from "express";
-import 'dotenv/config';
+import dotenv from 'dotenv'
 import useRoutes from './routes/userRoutes.js'
 import storeRoutes from './routes/storeRoutes.js'
 import cartRoutes from './routes/cartRoutes.js'
+import connectDB from "./connectDB.js";
 import cors from 'cors'
 const app = express();
 const PORT = process.env.PORT || 3000
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}))
+
+dotenv.config();
+
+// connectDB()
 
 app.use(cors({
     origin: ['http://localhost:5173','https://sona-sooty.vercel.app'],
